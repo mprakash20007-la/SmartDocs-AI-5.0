@@ -1,0 +1,6 @@
+{
+  "name": "SmartDocs AI",
+  "description": "Transform Documents into Instant Knowledge. Chat, summarize, and generate quizzes from your PDF, DOCX, and TXT files instantly using Gemini AI.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
