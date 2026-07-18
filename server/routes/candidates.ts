@@ -96,10 +96,11 @@ router.post('/documents/:id/chat', async (req, res) => {
     const response = result.response.text();
 
     const newChat = await ChatModel.create({
-      documentId: document._id,
-      prompt,
-      response,
-      timestamp: new Date().toISOString(),
+      id: 'chat_' + Math.random().toString(36).substring(2, 11),
+      documentId: document._id.toString(),
+      title: prompt.substring(0, 50),
+      messages: [{ role: 'user', content: prompt }, { role: 'ai', content: response }],
+      createdAt: new Date().toISOString(),
     });
     res.status(201).json(newChat);
   } catch (error) {
@@ -120,10 +121,13 @@ router.post('/documents/:id/quiz', async (req, res) => {
     const result = await model.generateContent(`Generate a multiple-choice quiz with 3 questions based on the following document. Provide questions, 4 options for each, and the correct answer letter (A, B, C, D). Format as JSON array of objects: "${await fetchBlobAsText(document.content)}"`);
     const response = result.response.text();
 
+    let parsedQuestions = [];
+    try { parsedQuestions = JSON.parse(response); } catch(e) {}
     const newQuiz = await QuizModel.create({
-      documentId: document._id,
-      quizContent: response,
-      timestamp: new Date().toISOString(),
+      id: 'quiz_' + Math.random().toString(36).substring(2, 11),
+      documentId: document._id.toString(),
+      questions: parsedQuestions,
+      completedAt: new Date().toISOString(),
     });
     res.status(201).json(newQuiz);
   } catch (error) {
@@ -172,10 +176,11 @@ router.post('/documents/:id/extract-tasks', async (req, res) => {
 
     const newTasks = await Promise.all(tasksArray.map((task: string) =>
       TaskModel.create({
-        documentId: document._id,
-        description: task,
+        id: 'task_' + Math.random().toString(36).substring(2, 11),
+        documentId: document._id.toString(),
+        title: task,
         completed: false,
-        timestamp: new Date().toISOString(),
+        date: new Date().toISOString(),
       })
     ));
     res.status(201).json(newTasks);
@@ -200,10 +205,11 @@ router.post('/documents/:id/extract-reminders', async (req, res) => {
 
     const newReminders = await Promise.all(remindersArray.map((reminder: string) =>
       ReminderModel.create({
-        documentId: document._id,
-        description: reminder,
-        set: false, // Assuming 'set' means scheduled
-        timestamp: new Date().toISOString(),
+        id: 'rem_' + Math.random().toString(36).substring(2, 11),
+        documentId: document._id.toString(),
+        title: reminder,
+        status: 'pending',
+        date: new Date().toISOString(),
       })
     ));
     res.status(201).json(newReminders);
@@ -231,12 +237,13 @@ router.post('/documents/:id/smart-email', async (req, res) => {
     const emailBody = result.response.text();
 
     const newSmartEmail = await SmartEmailHistoryModel.create({
-      documentId: document._id,
-      recipient,
+      id: 'smem_' + Math.random().toString(36).substring(2, 11),
+      documentId: document._id.toString(),
+      recipientEmail: recipient,
       subject,
       tone,
-      body: emailBody,
-      timestamp: new Date().toISOString(),
+      action: 'draft',
+      sentAt: new Date().toISOString(),
     });
     res.status(201).json(newSmartEmail);
   } catch (error) {
@@ -263,10 +270,11 @@ router.post('/documents/:id/assess-candidate', async (req, res) => {
     const assessment = result.response.text();
 
     const newAssessment = await CandidateAssessmentModel.create({
-      documentId: document._id,
+      id: 'assmnt_' + Math.random().toString(36).substring(2, 11),
+      documentId: document._id.toString(),
       jobDescription,
-      assessment,
-      timestamp: new Date().toISOString(),
+      analysis: assessment,
+      completedAt: new Date().toISOString(),
     });
     res.status(201).json(newAssessment);
   } catch (error) {
@@ -810,7 +818,7 @@ router.put('/settings', async (req, res) => {
 router.post('/run-automation', async (req, res) => {
   try {
     // runBackgroundAutomation itself will need to be refactored to use Mongoose internally
-    await runBackgroundAutomation();
+    await runBackgroundAutomation(req.body.documentId);
     res.status(200).send('Automation started');
   } catch (error) {
     console.error('Error running automation:', error);

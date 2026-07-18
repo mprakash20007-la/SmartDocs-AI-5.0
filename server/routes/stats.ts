@@ -1,6 +1,7 @@
 import express from 'express';
 import { getGeminiClient, Type, runBackgroundAutomation } from '../../server-core.ts';
 import { DocumentModel, ChatModel, QuizModel } from '../db/mongo.ts';
+import { UserStats } from '../../src/types.ts';
 
 const router = express.Router();
 

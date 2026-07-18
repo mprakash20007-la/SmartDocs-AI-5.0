@@ -13,7 +13,7 @@ import {
   CandidateAssessmentModel,
   SettingsModel
 } from '../db/mongo.ts';
-import { EmailLogEntry } from '../../types.ts'; // Assuming EmailLogEntry is defined in types.ts
+import { EmailLogEntry } from '../../src/types.ts'; // Assuming EmailLogEntry is defined in types.ts
 
 const router = express.Router();
 

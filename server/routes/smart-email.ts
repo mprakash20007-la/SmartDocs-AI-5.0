@@ -1,7 +1,7 @@
 import express from 'express';
 import { getGeminiClient, fetchBlobAsText, fetchBlobAsBase64, Type, runBackgroundAutomation, getFallbackAssessmentQuestions, sendAssessmentInviteEmail, generateOfferLetterPdf, getEmailTransporter, buildEmailHtml, generateAnswerKeyPdf, extractCandidateProfile } from '../../server-core.ts';
 import { DocumentModel, CandidateAssessmentModel, SmartEmailHistoryModel } from '../db/mongo.ts';
-import { CandidateAssessment, CandidateProfile, CandidateQuizQuestion, ResumeAnalysis, SmartEmailAction, SmartEmailCategory, SmartEmailDraft, SmartEmailHistoryEntry, SmartEmailTone } from '../../types.ts';
+import { CandidateAssessment, CandidateProfile, CandidateQuizQuestion, ResumeAnalysis, SmartEmailAction, SmartEmailCategory, SmartEmailDraft, SmartEmailHistoryEntry, SmartEmailTone } from '../../src/types.ts';
 
 const router = express.Router();
 
