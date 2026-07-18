@@ -6,7 +6,7 @@
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "dist/server.cjs"
+      "dest": "api/server.js"
     },
     {
       "handle": "filesystem"

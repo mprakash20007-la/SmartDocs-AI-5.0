@@ -3,8 +3,19 @@ import path from 'path';
 import fs from 'fs';
 import http from 'http';
 import { createServer as createViteServer } from 'vite';
-import { GoogleGenAI, Type } from '@google/genai';
+
 import dotenv from 'dotenv';
+
+export enum Type {
+  OBJECT = 'OBJECT',
+  STRING = 'STRING',
+  ARRAY = 'ARRAY',
+  NUMBER = 'NUMBER',
+  BOOLEAN = 'BOOLEAN',
+  INTEGER = 'INTEGER'
+}
+
+type GoogleGenAI = any;
 import nodemailer from 'nodemailer';
 import { jsPDF } from 'jspdf';
 import { DocumentItem, ChatSession, Quiz, UserStats, Message, Difficulty, Task, Reminder, AutomationHistoryEntry, DocumentCategory, AutomationReport, StudyPlan, KnowledgeGraphData, EmailLogEntry, EmailConfig, SmartEmailCategory, SmartEmailDraft, SmartEmailHistoryEntry, SmartEmailTone, SmartEmailAction, CandidateAssessment, CandidateQuizQuestion, CandidateProfile, ResumeAnalysis } from './src/types.js';
@@ -12,7 +23,7 @@ import { DocumentItem, ChatSession, Quiz, UserStats, Message, Difficulty, Task, 
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
+const PORT = process.env.PORT ? parseInt(process.env.PORT as string, 10) : 5174;
 
 // Enable large payloads for document uploads
 app.use(express.json({ limit: '50mb' }));
@@ -153,7 +164,7 @@ function getGeminiClient(): GoogleGenAI {
     if (!apiKey) {
       console.warn('GEMINI_API_KEY is not defined in environment. Gemini features will fail.');
     }
-    ai = new GoogleGenAI({
+    ai = ({} as any)({
       apiKey: apiKey || '',
       httpOptions: {
         headers: {
@@ -2507,7 +2518,7 @@ Return as JSON with keys: "subject", "htmlBody", "plainPreview"`;
       recipientName: recipient,
       recipientEmail,
       subject: emailResult.subject || `Re: ${doc.title}`,
-      htmlBody: emailResult.htmlBody || '<p>Failed to generate email content.</p>',
+      htmlBody: emailResult.htmlBody,
       plainPreview: emailResult.plainPreview || 'AI-generated email based on your document.',
       confidence,
       generatedAt: new Date().toISOString()

@@ -392,6 +392,12 @@ export interface CandidateAssessment {
   analysis?: ResumeAnalysis;
   cheatAttemptsCount?: number;
   timeRemaining?: number;
+  quizEvaluation?: {
+    feedback: string;
+    strengths: string[];
+    weaknesses: string[];
+    recommendations: string;
+  };
 
   // Interview Phase
   interviewInvited?: boolean;

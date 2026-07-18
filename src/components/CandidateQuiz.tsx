@@ -5,6 +5,7 @@ import GlassCard from './GlassCard';
 
 interface CandidateQuizProps {
   assessId: string;
+  onTransitionToInterview?: () => void;
 }
 
 interface Question {
@@ -24,7 +25,7 @@ interface AssessmentData {
   cheatAttemptsCount?: number;
 }
 
-export const CandidateQuiz: React.FC<CandidateQuizProps> = ({ assessId }) => {
+export const CandidateQuiz: React.FC<CandidateQuizProps> = ({ assessId, onTransitionToInterview }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<AssessmentData & { decisionSent?: 'offer' | 'rejection' | null; candidateSkills?: string } | null>(null);
@@ -483,6 +484,23 @@ export const CandidateQuiz: React.FC<CandidateQuizProps> = ({ assessId }) => {
                       <strong>🎉 Screening Threshold Cleared!</strong><br />
                       You have passed the suitability test (Score &gt;= 8/10). We have sent an email with the link to the next step: the <strong>AI Voice/Text Interview Portal</strong>. Please check your inbox at: <strong>{data.candidateEmail}</strong>.
                     </div>
+
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => {
+                        if (onTransitionToInterview) {
+                          onTransitionToInterview();
+                        } else {
+                          window.location.search = `?assessId=${assessId}&phase=interview`;
+                        }
+                      }}
+                      className="w-full py-3.5 rounded-xl bg-gradient-to-r from-brand-purple to-brand-cyan hover:brightness-110 text-white font-extrabold text-xs shadow-lg shadow-brand-purple/20 transition-all cursor-pointer flex items-center justify-center space-x-2"
+                    >
+                      <Sparkles className="w-4 h-4 text-brand-cyan animate-pulse" />
+                      <span>Start Professional AI Interview Now</span>
+                      <ChevronRight className="w-4 h-4" />
+                    </motion.button>
                   </>
                 ) : decision === 'rejection' ? (
                   <>

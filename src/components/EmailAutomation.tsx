@@ -11,6 +11,7 @@ import GlassCard from './GlassCard';
 
 interface EmailAutomationProps {
   activeDoc: DocumentItem | null;
+  userEmail?: string;
 }
 
 interface DetectedInfo {
@@ -21,7 +22,7 @@ interface DetectedInfo {
   documentDescription: string;
 }
 
-export const EmailAutomation: React.FC<EmailAutomationProps> = ({ activeDoc }) => {
+export const EmailAutomation: React.FC<EmailAutomationProps> = ({ activeDoc, userEmail }) => {
   // Common states
   const [error, setError] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
@@ -30,7 +31,7 @@ export const EmailAutomation: React.FC<EmailAutomationProps> = ({ activeDoc }) =
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
 
   // Recipient configs (general/other categories)
-  const [recipientEmail, setRecipientEmail] = useState('mprakash20007@gmail.com');
+  const [recipientEmail, setRecipientEmail] = useState(userEmail || '');
   const [recipientName, setRecipientName] = useState('');
 
   // AI Detection State
@@ -41,7 +42,7 @@ export const EmailAutomation: React.FC<EmailAutomationProps> = ({ activeDoc }) =
   const [assessments, setAssessments] = useState<CandidateAssessment[]>([]);
   const [isLoadingAssessments, setIsLoadingAssessments] = useState(false);
   const [inviteName, setInviteName] = useState('');
-  const [inviteEmail, setInviteEmail] = useState('mprakash20007@gmail.com');
+  const [inviteEmail, setInviteEmail] = useState(userEmail || '');
   const [inviteRole, setInviteRole] = useState('');
   const [isInviting, setIsInviting] = useState(false);
 

@@ -6,7 +6,10 @@ interface GlassCardProps {
   className?: string;
   onClick?: () => void;
   hoverEffect?: boolean;
+  glowBorder?: boolean;
+  shimmer?: boolean;
   id?: string;
+  style?: React.CSSProperties;
 }
 
 export const GlassCard: React.FC<GlassCardProps> = ({
@@ -14,11 +17,24 @@ export const GlassCard: React.FC<GlassCardProps> = ({
   className = '',
   onClick,
   hoverEffect = false,
-  id
+  glowBorder = false,
+  shimmer = false,
+  id,
+  style
 }) => {
-  const baseClasses = 'glass-panel rounded-2xl p-6 transition-all duration-300';
+  const baseClasses = 'glass-panel rounded-2xl p-6 transition-all duration-300 relative';
   const hoverClasses = hoverEffect ? 'glass-card-hover cursor-pointer' : '';
-  const combinedClasses = `${baseClasses} ${hoverClasses} ${className}`;
+  const glowClasses = glowBorder ? 'animate-border-dance shadow-purple-glow' : '';
+  const combinedClasses = `${baseClasses} ${hoverClasses} ${glowClasses} ${className}`;
+
+  if (shimmer) {
+    return (
+      <div id={id} className={`${baseClasses} ${className} overflow-hidden`} style={style}>
+        <div className="shimmer-bg absolute inset-0 rounded-2xl pointer-events-none" />
+        {children}
+      </div>
+    );
+  }
 
   if (hoverEffect) {
     return (
@@ -26,9 +42,10 @@ export const GlassCard: React.FC<GlassCardProps> = ({
         id={id}
         onClick={onClick}
         className={combinedClasses}
-        whileHover={{ scale: 1.01, translateY: -2 }}
-        whileTap={{ scale: 0.99 }}
-        transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+        style={style}
+        whileHover={{ scale: 1.015, translateY: -3 }}
+        whileTap={{ scale: 0.985 }}
+        transition={{ type: 'spring', stiffness: 320, damping: 22 }}
       >
         {children}
       </motion.div>
@@ -36,7 +53,7 @@ export const GlassCard: React.FC<GlassCardProps> = ({
   }
 
   return (
-    <div id={id} onClick={onClick} className={combinedClasses}>
+    <div id={id} onClick={onClick} className={combinedClasses} style={style}>
       {children}
     </div>
   );

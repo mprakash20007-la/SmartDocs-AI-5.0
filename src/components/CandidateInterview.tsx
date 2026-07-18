@@ -46,6 +46,12 @@ export const CandidateInterview: React.FC<CandidateInterviewProps> = ({ assessId
       const dataVal = await res.json();
       setData(dataVal);
 
+      if (dataVal.interviewCompleted) {
+        setFinished(true);
+        setFinalDecision(dataVal.finalDecision || null);
+        setMetrics(dataVal.interviewMetrics || null);
+      }
+
       // Fetch interview questions
       const qRes = await fetch(`/api/smart-email/assessments/${assessId}/interview-questions`);
       if (qRes.ok) {
@@ -264,7 +270,7 @@ export const CandidateInterview: React.FC<CandidateInterviewProps> = ({ assessId
               exit={{ opacity: 0, y: -15 }}
             >
               <GlassCard className="p-6 sm:p-8 space-y-6">
-                <div className="flex items-center justify-between text-xs text-gray-400 border-b border-white/5 pb-3">
+                <div className="flex items-center justify-between text-xs text-gray-400 pb-1">
                   <span>Question {currentIdx + 1} of {questions.length}</span>
                   <span className="text-brand-cyan font-bold tracking-wider uppercase flex items-center space-x-1">
                     <span className="w-1.5 h-1.5 rounded-full bg-brand-cyan animate-ping mr-1" />
@@ -272,16 +278,42 @@ export const CandidateInterview: React.FC<CandidateInterviewProps> = ({ assessId
                   </span>
                 </div>
 
+                {/* Progress tracker bar */}
+                <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
+                  <motion.div
+                    className="h-full bg-gradient-to-r from-brand-purple to-brand-cyan"
+                    initial={{ width: 0 }}
+                    animate={{ width: `${((currentIdx + 1) / questions.length) * 100}%` }}
+                    transition={{ duration: 0.3 }}
+                  />
+                </div>
+
                 {/* AI Speaker Card */}
                 <div className="p-5 rounded-xl border border-brand-purple/20 bg-brand-purple/5 relative overflow-hidden flex items-start space-x-4">
                   <div className={`p-3 rounded-xl shrink-0 ${isSpeaking ? 'bg-brand-purple text-white animate-pulse' : 'bg-white/5 text-gray-400'}`}>
                     <Volume2 className="w-5 h-5" />
                   </div>
-                  <div className="space-y-1">
+                  <div className="space-y-1 flex-1 pr-6">
                     <strong className="text-[10px] text-brand-purple uppercase tracking-wider font-black">AI Recruitment Assistant</strong>
                     <p className="text-xs sm:text-sm font-semibold text-white leading-relaxed">
                       {questions[currentIdx]}
                     </p>
+                    {isSpeaking && (
+                      <div className="flex items-center space-x-1 pt-2">
+                        {[...Array(6)].map((_, i) => (
+                          <motion.div
+                            key={i}
+                            className="w-0.5 bg-brand-purple rounded-full"
+                            animate={{ height: [4, 16, 4] }}
+                            transition={{
+                              repeat: Infinity,
+                              duration: 0.6,
+                              delay: i * 0.1,
+                            }}
+                          />
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                   <button
@@ -343,7 +375,11 @@ export const CandidateInterview: React.FC<CandidateInterviewProps> = ({ assessId
                     value={answerText}
                     onChange={(e) => setAnswerText(e.target.value)}
                     placeholder="Speak using your mic or type your response detailed here..."
-                    className="w-full h-32 bg-white/5 border border-white/5 focus:border-brand-purple/25 focus:outline-none rounded-xl px-4 py-3 text-xs text-white resize-none leading-relaxed"
+                    className={`w-full h-32 bg-white/5 border focus:outline-none rounded-xl px-4 py-3 text-xs text-white resize-none leading-relaxed transition-all ${
+                      isListening
+                        ? 'border-brand-cyan/40 bg-brand-cyan/5 shadow-[0_0_15px_rgba(14,165,233,0.15)]'
+                        : 'border-white/5 focus:border-brand-purple/25'
+                    }`}
                   />
                 </div>
 
@@ -393,13 +429,34 @@ export const CandidateInterview: React.FC<CandidateInterviewProps> = ({ assessId
                     </div>
 
                     {metrics && (
-                      <div className="grid grid-cols-2 gap-2 text-[10px] text-left text-gray-300 max-w-sm mx-auto bg-white/2 p-4 rounded-xl border border-white/5">
-                        <div>🌟 Accuracy: {metrics.accuracy}/10</div>
-                        <div>💬 Communication: {metrics.communication}/10</div>
-                        <div>🧠 Problem Solving: {metrics.problemSolving}/10</div>
-                        <div>⚡ Confidence: {metrics.confidence}/10</div>
-                        <div className="col-span-2 text-center border-t border-white/5 pt-2 mt-1 text-emerald-400 font-bold">
-                          Overall Fit Score: {metrics.overallScore}/10 (Hired!)
+                      <div className="space-y-3.5 max-w-sm mx-auto bg-white/2 p-5 rounded-2xl border border-white/5 text-left">
+                        <div className="text-[10px] font-extrabold text-white mb-2 uppercase tracking-wider text-center">AI Evaluation Summary</div>
+                        <div className="space-y-2.5">
+                          {[
+                            { name: 'Technical Accuracy', val: metrics.accuracy, color: 'from-blue-500 to-indigo-500' },
+                            { name: 'Communication & Expression', val: metrics.communication, color: 'from-purple-500 to-pink-500' },
+                            { name: 'Problem Solving Skill', val: metrics.problemSolving, color: 'from-teal-500 to-emerald-500' },
+                            { name: 'Confidence & Assurance', val: metrics.confidence, color: 'from-amber-500 to-orange-500' },
+                          ].map((item, index) => (
+                            <div key={index} className="space-y-1">
+                              <div className="flex justify-between text-[9px] font-bold text-gray-400">
+                                <span>{item.name}</span>
+                                <span className="text-white font-black">{item.val} / 10</span>
+                              </div>
+                              <div className="w-full bg-white/5 h-2 rounded-full overflow-hidden">
+                                <motion.div
+                                  className={`h-full bg-gradient-to-r ${item.color}`}
+                                  initial={{ width: 0 }}
+                                  animate={{ width: `${(item.val / 10) * 100}%` }}
+                                  transition={{ duration: 0.8, delay: index * 0.1 }}
+                                />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        <div className="border-t border-white/5 pt-3 mt-2 text-center">
+                          <span className="text-[9px] text-gray-400 uppercase tracking-widest font-black block">Overall Fit Score</span>
+                          <span className="text-2xl font-black text-emerald-400">{metrics.overallScore}/10</span>
                         </div>
                       </div>
                     )}
@@ -424,12 +481,35 @@ export const CandidateInterview: React.FC<CandidateInterviewProps> = ({ assessId
                     </div>
 
                     {metrics && (
-                      <div className="grid grid-cols-2 gap-2 text-[10px] text-left text-gray-300 max-w-sm mx-auto bg-white/2 p-4 rounded-xl border border-white/5">
-                        <div>Accuracy: {metrics.accuracy}/10</div>
-                        <div>Communication: {metrics.communication}/10</div>
-                        <div>Problem Solving: {metrics.problemSolving}/10</div>
-                        <div className="col-span-2 text-center border-t border-white/5 pt-2 mt-1 text-red-400 font-bold">
-                          Overall Fit Score: {metrics.overallScore}/10 (Below threshold 7/10)
+                      <div className="space-y-3.5 max-w-sm mx-auto bg-white/2 p-5 rounded-2xl border border-white/5 text-left">
+                        <div className="text-[10px] font-extrabold text-white mb-2 uppercase tracking-wider text-center">AI Evaluation Summary</div>
+                        <div className="space-y-2.5">
+                          {[
+                            { name: 'Technical Accuracy', val: metrics.accuracy, color: 'from-blue-500 to-indigo-500' },
+                            { name: 'Communication & Expression', val: metrics.communication, color: 'from-purple-500 to-pink-500' },
+                            { name: 'Problem Solving Skill', val: metrics.problemSolving, color: 'from-teal-500 to-emerald-500' },
+                            { name: 'Confidence & Assurance', val: metrics.confidence || 8, color: 'from-amber-500 to-orange-500' },
+                          ].map((item, index) => (
+                            <div key={index} className="space-y-1">
+                              <div className="flex justify-between text-[9px] font-bold text-gray-400">
+                                <span>{item.name}</span>
+                                <span className="text-white font-black">{item.val} / 10</span>
+                              </div>
+                              <div className="w-full bg-white/5 h-2 rounded-full overflow-hidden">
+                                <motion.div
+                                  className={`h-full bg-gradient-to-r ${item.color}`}
+                                  initial={{ width: 0 }}
+                                  animate={{ width: `${(item.val / 10) * 100}%` }}
+                                  transition={{ duration: 0.8, delay: index * 0.1 }}
+                                />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        <div className="border-t border-white/5 pt-3 mt-2 text-center">
+                          <span className="text-[9px] text-gray-400 uppercase tracking-widest font-black block">Overall Fit Score</span>
+                          <span className="text-2xl font-black text-red-400">{metrics.overallScore}/10</span>
+                          <span className="text-[9px] text-red-400 font-bold block mt-1">Below threshold (7/10)</span>
                         </div>
                       </div>
                     )}

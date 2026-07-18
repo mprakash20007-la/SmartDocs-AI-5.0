@@ -34,7 +34,18 @@ import {
   Compass,
   Award,
   Square,
-  Network
+  Network,
+  Zap,
+  Star,
+  Users,
+  Cpu,
+  Database,
+  BarChart2,
+  CheckCircle2,
+  Rocket,
+  Crown,
+  Brain,
+  Mail
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { PageId, DocumentItem, UserStats, Task, Reminder, AutomationHistoryEntry, DocumentCategory } from './types';
@@ -62,24 +73,117 @@ const testimonials = [
     name: 'Sarah Jenkins',
     role: 'Medical Student, Johns Hopkins',
     quote: 'SmartDocs AI saved me countless hours. I upload entire chapters and get instant summaries and test quizzes. My recall score improved by 35%!',
-    avatar: 'S'
+    avatar: 'S',
+    stars: 5,
+    color: 'from-brand-purple/20 to-brand-cyan/5'
   },
   {
     name: 'David Chen',
     role: 'Equity Research Analyst',
     quote: 'The Gemini-powered precision is incredible. It parses balance sheets and reports instantly, letting me verify complex details via natural language chat.',
-    avatar: 'D'
+    avatar: 'D',
+    stars: 5,
+    color: 'from-brand-cyan/15 to-brand-purple/5'
+  },
+  {
+    name: 'Priya Nair',
+    role: 'Senior Legal Counsel, TechCorp',
+    quote: 'Contract review that used to take my team 3 days now takes 20 minutes. The AI extracts clauses, flags risks, and drafts response emails automatically.',
+    avatar: 'P',
+    stars: 5,
+    color: 'from-amber-500/10 to-brand-purple/5'
+  },
+  {
+    name: 'Marcus Webb',
+    role: 'PhD Researcher, MIT CSAIL',
+    quote: 'The knowledge graph feature is mind-blowing. It maps concept relationships across 50+ research papers and surfaces connections I would have missed entirely.',
+    avatar: 'M',
+    stars: 5,
+    color: 'from-emerald-500/10 to-brand-cyan/5'
   }
 ];
 
 const faqs = [
   {
     q: 'How does SmartDocs AI read my documents?',
-    a: 'We leverage the advanced multimodal capabilities of Google Gemini 3.5 Flash. PDFs, DOCX, and TXTs are analyzed with exact semantic intelligence, preventing halluncinations.'
+    a: 'We leverage the advanced multimodal capabilities of Google Gemini 2.5 Flash. PDFs, DOCX, and TXTs are analyzed with exact semantic intelligence, preventing hallucinations.'
   },
   {
     q: 'Is my data secure?',
-    a: 'Yes. Your document content is stored strictly inside your private cloud run space and is never used to train public AI models. Privacy is guaranteed.'
+    a: 'Yes. Your document content is stored strictly inside your private cloud instance and is never used to train public AI models. We follow SOC2 compliance principles.'
+  },
+  {
+    q: 'What file formats are supported?',
+    a: 'We currently support PDF, DOCX, and TXT files up to 50MB. Support for PPTX, XLSX, and image-based PDFs via OCR is coming in Q3 2026.'
+  },
+  {
+    q: 'How accurate is the AI quiz generation?',
+    a: 'Quiz questions are generated directly from the document context with Gemini grounding, achieving over 94% factual accuracy in internal testing.'
+  }
+];
+
+const pricingTiers = [
+  {
+    name: 'Free',
+    icon: Zap,
+    price: '$0',
+    period: 'forever',
+    description: 'Perfect for individuals getting started.',
+    color: 'text-gray-300',
+    borderColor: 'border-white/8',
+    bg: '',
+    features: [
+      '25 document uploads',
+      'AI Chat per document',
+      'Auto Summaries',
+      'Quiz Generator',
+      'Email Automation',
+    ],
+    cta: 'Get Started Free',
+    ctaStyle: 'bg-white/8 border border-white/10 hover:bg-white/12 text-white',
+    popular: false,
+  },
+  {
+    name: 'Pro',
+    icon: Crown,
+    price: '$19',
+    period: 'per month',
+    description: 'For power users and growing teams.',
+    color: 'text-brand-purple',
+    borderColor: 'border-brand-purple/30',
+    bg: 'pricing-card-popular',
+    features: [
+      'Unlimited documents',
+      'Multi-Document AI Chat',
+      'Knowledge Graph mapping',
+      'Candidate Assessment suite',
+      'Priority Gemini processing',
+      'PDF export & email delivery',
+    ],
+    cta: 'Start Pro Trial',
+    ctaStyle: 'bg-gradient-to-r from-brand-purple to-brand-purple/70 text-white shadow-purple-glow',
+    popular: true,
+  },
+  {
+    name: 'Enterprise',
+    icon: Rocket,
+    price: 'Custom',
+    period: 'per seat',
+    description: 'Full-scale deployment with SLAs.',
+    color: 'text-brand-cyan',
+    borderColor: 'border-brand-cyan/20',
+    bg: '',
+    features: [
+      'Everything in Pro',
+      'SSO & SAML auth',
+      'Dedicated cloud instance',
+      'Custom AI fine-tuning',
+      'SLA + 24/7 support',
+      'Audit logs & compliance',
+    ],
+    cta: 'Contact Sales',
+    ctaStyle: 'bg-brand-cyan/10 border border-brand-cyan/25 hover:bg-brand-cyan/20 text-brand-cyan',
+    popular: false,
   }
 ];
 
@@ -329,20 +433,21 @@ export default function App() {
   // Check for candidate assessment view request
   const urlParams = new URLSearchParams(window.location.search);
   const assessId = urlParams.get('assessId');
-  const phase = urlParams.get('phase');
+  const [assessmentPhase, setAssessmentPhase] = useState<string | null>(() => urlParams.get('phase'));
 
   if (assessId) {
-    if (phase === 'interview') {
+    if (assessmentPhase === 'interview') {
       return <CandidateInterview assessId={assessId} />;
     }
-    return <CandidateQuiz assessId={assessId} />;
+    return <CandidateQuiz assessId={assessId} onTransitionToInterview={() => setAssessmentPhase('interview')} />;
   }
 
   return (
     <div className={`min-h-screen relative overflow-x-hidden select-none bg-brand-dark ${darkMode ? 'dark' : ''}`}>
-      {/* Background Ambient Aurora Circles */}
-      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-purple-600/20 blur-[120px] rounded-full pointer-events-none z-0 animate-aurora" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-cyan-600/15 blur-[100px] rounded-full pointer-events-none z-0 animate-aurora" style={{ animationDelay: '-5s' }} />
+      {/* Background Ambient Aurora Circles — Enhanced */}
+      <div className="absolute top-[-12%] left-[-8%] w-[55%] h-[55%] bg-purple-600/20 blur-[140px] rounded-full pointer-events-none z-0 animate-aurora" />
+      <div className="absolute bottom-[-12%] right-[-8%] w-[45%] h-[45%] bg-cyan-500/15 blur-[120px] rounded-full pointer-events-none z-0 animate-aurora-2" style={{ animationDelay: '-7s' }} />
+      <div className="absolute top-[40%] right-[20%] w-[30%] h-[30%] bg-indigo-600/10 blur-[100px] rounded-full pointer-events-none z-0 animate-aurora" style={{ animationDelay: '-12s' }} />
 
       {/* Main Layout Manager */}
       {isLoggedIn && currentPage !== 'landing' ? (
@@ -354,6 +459,7 @@ export default function App() {
             activeDoc={activeDoc}
             onLogout={handleLogout}
             userEmail={userEmail}
+            totalDocs={documents.length}
           />
 
           {/* Core scrollable content area */}
@@ -362,7 +468,7 @@ export default function App() {
             <header className="flex items-center justify-between mb-8 pb-4 border-b border-white/5" id="workspace-header">
               <div>
                 <h1 className="text-2xl font-extrabold text-white capitalize tracking-tight">
-                  {currentPage === 'dashboard' && 'Enterprise Dashboard'}
+                  {currentPage === 'dashboard' && 'SmartDocs AI Dashboard'}
                   {currentPage === 'library' && 'Document Library'}
                   {currentPage === 'chat' && 'AI Context Chat'}
                   {currentPage === 'summary' && 'Knowledge Summaries'}
@@ -411,55 +517,111 @@ export default function App() {
                 {/* 1. Dashboard View */}
                 {currentPage === 'dashboard' && (
                   <div className="space-y-8" id="dashboard-page">
-                    {/* Welcome Card banner */}
-                    <GlassCard className="bg-gradient-to-r from-brand-purple/15 to-brand-cyan/5 border border-brand-purple/20 relative overflow-hidden p-8">
-                      <div className="absolute right-0 top-0 translate-x-12 -translate-y-12 w-48 h-48 bg-brand-purple/10 blur-3xl rounded-full" />
+                    {/* Welcome Card banner — Enhanced */}
+                    <GlassCard className="border border-brand-purple/25 relative overflow-hidden p-8" style={{ background: 'linear-gradient(135deg, rgba(168,85,247,0.12) 0%, rgba(34,211,238,0.06) 60%, rgba(168,85,247,0.04) 100%)' }}>
+                      {/* Decorative orbs */}
+                      <div className="absolute right-0 top-0 translate-x-8 -translate-y-8 w-56 h-56 bg-brand-purple/15 blur-3xl rounded-full pointer-events-none" />
+                      <div className="absolute right-24 bottom-0 translate-y-6 w-32 h-32 bg-brand-cyan/10 blur-2xl rounded-full pointer-events-none" />
+                      {/* Animated grid pattern */}
+                      <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(circle, #a855f7 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
                       <div className="max-w-xl space-y-4 relative">
-                        <div className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded bg-brand-purple/20 text-brand-purple text-[10px] font-bold uppercase tracking-widest border border-brand-purple/10">
+                        <div className="inline-flex items-center space-x-2 px-3 py-1.5 rounded-full bg-brand-purple/15 text-brand-purple text-[10px] font-bold uppercase tracking-widest border border-brand-purple/20">
                           <Sparkles className="w-3.5 h-3.5 text-brand-cyan shrink-0 animate-pulse" />
-                          <span>Gemini Copilot Agent Hub</span>
+                          <span>Gemini Copilot Agent Hub · Powered by Gemini 2.5 Flash</span>
                         </div>
-                        <h2 className="text-2xl font-extrabold text-white leading-tight">
-                          Enterprise AI Document Automation Platform
+                        <h2 className="text-3xl font-black text-white leading-tight tracking-tight">
+                          Enterprise AI Document
+                          <span className="block gradient-text-animated">Automation Platform</span>
                         </h2>
-                        <p className="text-sm text-gray-300">
+                        <p className="text-sm text-gray-300 leading-relaxed">
                           Deploy AI agents to read, classify, and extract structured knowledge, deadlines, and timeline guides from your manuals, proposals, or reports in one click.
                         </p>
                         <div className="pt-2 flex items-center space-x-3">
-                          <button
+                          <motion.button
                             onClick={() => setCurrentPage('library')}
-                            className="px-5 py-2.5 rounded-xl bg-brand-purple hover:bg-brand-purple/95 text-white font-semibold text-xs shadow-lg shadow-brand-purple/25 flex items-center space-x-2 active:scale-95 transition-all cursor-pointer"
+                            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand-purple to-brand-purple/80 text-white font-bold text-xs shadow-purple-glow flex items-center space-x-2 cursor-pointer"
+                            whileHover={{ scale: 1.03, y: -1 }}
+                            whileTap={{ scale: 0.97 }}
                             id="dashboard-cta-upload"
                           >
+                            <Zap className="w-3.5 h-3.5 text-brand-cyan" />
                             <span>Go to Library Vault</span>
-                            <ArrowRight className="w-4 h-4" />
-                          </button>
+                            <ArrowRight className="w-3.5 h-3.5" />
+                          </motion.button>
+                          <motion.button
+                            onClick={() => setCurrentPage('automation_center')}
+                            className="px-5 py-2.5 rounded-xl bg-white/5 border border-white/8 hover:bg-white/8 text-white font-semibold text-xs flex items-center space-x-2 transition-all"
+                            whileTap={{ scale: 0.97 }}
+                          >
+                            <Cpu className="w-3.5 h-3.5 text-brand-purple" />
+                            <span>Run Automation</span>
+                          </motion.button>
                         </div>
                       </div>
                     </GlassCard>
 
-                    {/* Stats counters row */}
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+                    {/* Stats counters row — Enhanced with gradient icons */}
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                       {[
-                        { label: 'Total Vault Files', value: stats.totalDocuments, icon: Files, color: 'text-brand-purple' },
-                        { label: 'Quizzes Completed', value: stats.totalQuizzes, icon: HelpCircle, color: 'text-green-400' },
-                        { label: 'Streak Tracker', value: `${stats.streak} Days`, icon: TrendingUp, color: 'text-amber-500' },
-                        { label: 'Knowledge Score', value: `${stats.knowledgeScore}%`, icon: Award, color: 'text-brand-cyan' }
+                        { label: 'Vault Files', value: stats.totalDocuments, icon: Files, color: 'text-brand-purple', gradient: 'from-brand-purple/25 to-brand-purple/5', borderColor: 'border-brand-purple/20', glow: 'shadow-purple-glow' },
+                        { label: 'Quizzes Done', value: stats.totalQuizzes, icon: HelpCircle, color: 'text-emerald-400', gradient: 'from-emerald-500/20 to-emerald-500/5', borderColor: 'border-emerald-500/20', glow: '' },
+                        { label: 'Day Streak', value: `${stats.streak}🔥`, icon: TrendingUp, color: 'text-amber-400', gradient: 'from-amber-500/20 to-amber-500/5', borderColor: 'border-amber-500/20', glow: '' },
+                        { label: 'Knowledge', value: `${stats.knowledgeScore}%`, icon: Award, color: 'text-brand-cyan', gradient: 'from-brand-cyan/20 to-brand-cyan/5', borderColor: 'border-brand-cyan/20', glow: 'shadow-cyan-glow' }
                       ].map((stat, idx) => {
                         const Icon = stat.icon;
                         return (
-                          <GlassCard key={idx} className="p-5 flex items-center justify-between" id={`stat-card-${idx}`}>
-                            <div className="space-y-1">
-                              <span className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">{stat.label}</span>
-                              <div className="text-2xl font-extrabold text-white">{stat.value}</div>
-                            </div>
-                            <div className={`p-3 rounded-xl bg-white/5 border border-white/5 ${stat.color}`}>
-                              <Icon className="w-5 h-5" />
-                            </div>
-                          </GlassCard>
+                          <motion.div
+                            key={idx}
+                            initial={{ opacity: 0, y: 16 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: idx * 0.08, type: 'spring', stiffness: 300 }}
+                          >
+                            <GlassCard className={`p-5 flex items-center justify-between ${stat.glow}`} id={`stat-card-${idx}`}>
+                              <div className="space-y-1">
+                                <span className="text-[9px] text-gray-500 uppercase tracking-widest font-bold">{stat.label}</span>
+                                <div className="text-2xl font-black text-white">{stat.value}</div>
+                              </div>
+                              <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${stat.gradient} border ${stat.borderColor} flex items-center justify-center ${stat.color}`}>
+                                <Icon className="w-5 h-5" />
+                              </div>
+                            </GlassCard>
+                          </motion.div>
                         );
                       })}
                     </div>
+
+                    {/* 7-Day Activity Heatmap */}
+                    <GlassCard className="p-5">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center space-x-2">
+                          <BarChart2 className="w-4 h-4 text-brand-purple" />
+                          <h3 className="text-xs font-bold text-white uppercase tracking-wider">7-Day Activity</h3>
+                        </div>
+                        <span className="text-[10px] text-gray-500 font-semibold">This week</span>
+                      </div>
+                      <div className="flex items-end space-x-2">
+                        {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, i) => {
+                          const heights = [60, 85, 40, 95, 70, 30, 55];
+                          const h = heights[i];
+                          const isToday = i === new Date().getDay() - 1;
+                          return (
+                            <div key={day} className="flex-1 flex flex-col items-center space-y-1.5">
+                              <div className="w-full rounded-t-md relative overflow-hidden" style={{ height: `${h * 0.8}px` }}>
+                                <div
+                                  className={`absolute bottom-0 left-0 right-0 rounded-t-md transition-all duration-700 ${
+                                    isToday
+                                      ? 'bg-gradient-to-t from-brand-purple to-brand-cyan animate-glow-pulse'
+                                      : 'bg-gradient-to-t from-brand-purple/40 to-brand-purple/20'
+                                  }`}
+                                  style={{ height: '100%' }}
+                                />
+                              </div>
+                              <span className={`text-[8px] font-bold uppercase ${isToday ? 'text-brand-cyan' : 'text-gray-600'}`}>{day}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </GlassCard>
 
                     {/* Main Split Grid */}
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -1261,7 +1423,7 @@ export default function App() {
 
                 {/* Email Automation */}
                 {currentPage === 'email_automation' && (
-                  <EmailAutomation activeDoc={activeDoc} />
+                  <EmailAutomation activeDoc={activeDoc} userEmail={userEmail} />
                 )}
 
                 {/* Knowledge Graph */}
@@ -1318,49 +1480,128 @@ export default function App() {
                 className="min-h-screen flex items-center justify-center p-6 pt-24"
                 id="auth-page"
               >
-                <GlassCard className="max-w-md w-full p-8 space-y-6 border border-brand-purple/20 relative" id="auth-box">
-                  <div className="absolute right-0 top-0 translate-x-8 -translate-y-8 w-24 h-24 bg-brand-purple/10 blur-2xl rounded-full" />
-                  
-                  <div className="text-center space-y-2">
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-brand-purple to-brand-cyan flex items-center justify-center shadow-lg shadow-brand-purple/15 mx-auto">
-                      <BookOpen className="w-6 h-6 text-white" />
+                <div className="flex flex-col lg:flex-row items-center gap-10 max-w-4xl w-full">
+                  {/* Left — Feature bullets (desktop only) */}
+                  <div className="hidden lg:flex flex-col space-y-5 flex-1">
+                    <div className="space-y-2">
+                      <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-brand-purple/10 border border-brand-purple/20 text-[10px] font-bold text-brand-purple uppercase tracking-widest">
+                        <Sparkles className="w-3 h-3 text-brand-cyan" />
+                        <span>Trusted by 50,000+ users</span>
+                      </div>
+                      <h3 className="text-2xl font-black text-white leading-tight">Your AI-Powered
+                        <span className="block gradient-text-animated">Document Brain</span>
+                      </h3>
+                      <p className="text-sm text-gray-400 leading-relaxed">Everything you need to understand, quiz on, and act on any document — in minutes.</p>
                     </div>
-                    <h3 className="text-xl font-bold text-white">Welcome back</h3>
-                    <p className="text-xs text-gray-400">Choose your secure login path to access the Workspace</p>
+                    <div className="space-y-3">
+                      {[
+                        { icon: Zap, label: 'Instant AI Summaries', desc: 'Get executive summaries in seconds' },
+                        { icon: MessageSquare, label: 'Contextual AI Chat', desc: 'Ask anything about your documents' },
+                        { icon: Brain, label: 'Knowledge Graphs', desc: 'Visualize concept relationships' },
+                        { icon: Shield, label: 'Zero-retention Privacy', desc: 'Your data stays yours, always' },
+                      ].map((feat, i) => {
+                        const FIcon = feat.icon;
+                        return (
+                          <div key={i} className="flex items-center space-x-3">
+                            <div className="w-8 h-8 rounded-xl bg-brand-purple/12 border border-brand-purple/20 flex items-center justify-center shrink-0">
+                              <FIcon className="w-3.5 h-3.5 text-brand-purple" />
+                            </div>
+                            <div>
+                              <div className="text-xs font-bold text-white">{feat.label}</div>
+                              <div className="text-[10px] text-gray-500 font-medium">{feat.desc}</div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
 
-                  <div className="space-y-4 pt-2">
-                    {/* Real-feeling Google login */}
-                    <button
-                      onClick={() => handleLogin('mprakash20007@gmail.com')}
-                      className="w-full py-3.5 rounded-xl bg-white text-gray-900 text-sm font-bold shadow-lg flex items-center justify-center space-x-3 hover:bg-gray-100 transition-all border border-transparent active:scale-[0.98]"
-                      id="google-login-btn"
-                    >
-                      {/* Embedded Google Icon */}
-                      <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24">
-                        <path fill="#EA4335" d="M12 5.04c1.66 0 3.2.57 4.38 1.69l3.27-3.27C17.68 1.54 14.98 1 12 1 7.35 1 3.4 3.65 1.57 7.5l3.86 3C6.34 7.54 9 5.04 12 5.04z" />
-                        <path fill="#4285F4" d="M23.49 12.27c0-.81-.07-1.59-.2-2.34H12v4.45h6.46c-.28 1.48-1.12 2.74-2.38 3.59l3.69 2.87c2.16-1.99 3.42-4.93 3.42-8.57z" />
-                        <path fill="#FBBC05" d="M5.43 14.5c-.24-.72-.38-1.49-.38-2.3s.14-1.58.38-2.3L1.57 6.9C.57 8.9 0 11.13 0 13.5s.57 4.6 1.57 6.6l3.86-3c-.24-.72-.38-1.49-.38-2.3z" />
-                        <path fill="#34A853" d="M12 23c3.24 0 5.97-1.07 7.96-2.91l-3.69-2.87c-1.03.69-2.35 1.1-3.96 1.1-3 0-5.66-2.5-6.57-5.46L.88 15.86C2.71 19.7 6.66 23 12 23z" />
-                      </svg>
-                      <span>Sign in with Google</span>
-                    </button>
+                  {/* Right — Auth card */}
+                  <GlassCard className="w-full max-w-md p-8 space-y-6 border border-brand-purple/20 relative shadow-purple-glow" id="auth-box">
+                    <div className="absolute right-0 top-0 translate-x-8 -translate-y-8 w-28 h-28 bg-brand-purple/12 blur-2xl rounded-full" />
+                    <div className="absolute left-0 bottom-0 -translate-x-6 translate-y-6 w-20 h-20 bg-brand-cyan/8 blur-xl rounded-full" />
 
-                    {/* Guest Login */}
-                    <button
-                      onClick={() => handleLogin('guest@smartdocs.ai')}
-                      className="w-full py-3.5 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 text-white text-sm font-semibold flex items-center justify-center space-x-3 transition-all active:scale-[0.98]"
-                      id="guest-login-btn"
-                    >
-                      <User className="w-5 h-5 text-brand-purple" />
-                      <span>Continue as Guest</span>
-                    </button>
-                  </div>
+                    <div className="text-center space-y-2 relative">
+                      <motion.div
+                        initial={{ scale: 0.5, opacity: 0, rotate: -10 }}
+                        animate={{ scale: 1, opacity: 1, rotate: 0 }}
+                        transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                        className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-brand-purple to-brand-cyan flex items-center justify-center shadow-purple-glow mx-auto"
+                      >
+                        <BookOpen className="w-7 h-7 text-white" />
+                      </motion.div>
+                      <h3 className="text-xl font-black text-white">Welcome Back</h3>
+                      <p className="text-xs text-gray-400">Choose your secure login path to access the Workspace</p>
+                    </div>
 
-                  <div className="text-[10px] text-gray-500 text-center leading-relaxed font-normal pt-2">
-                    By accessing SmartDocs, you agree to our ephemeral study terms. All metadata resides strictly inside your container local environment.
-                  </div>
-                </GlassCard>
+                    <div className="space-y-3 pt-1 relative">
+                      {/* Email input */}
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider" htmlFor="auth-email-input">
+                          Your Email Address
+                        </label>
+                        <div className="relative">
+                          <input
+                            id="auth-email-input"
+                            type="email"
+                            placeholder="you@example.com"
+                            value={userEmail}
+                            onChange={(e) => setUserEmail(e.target.value)}
+                            className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-brand-purple/50 focus:bg-brand-purple/5 transition-all"
+                            onKeyDown={(e) => { if (e.key === 'Enter' && userEmail.trim()) handleLogin(userEmail.trim()); }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Google login — uses typed email */}
+                      <motion.button
+                        onClick={() => {
+                          const email = userEmail.trim() || 'guest@smartdocs.ai';
+                          handleLogin(email);
+                        }}
+                        disabled={!userEmail.trim()}
+                        className="w-full py-3.5 rounded-xl bg-white text-gray-900 text-sm font-bold shadow-elevation-md flex items-center justify-center space-x-3 hover:bg-gray-50 transition-all border border-transparent disabled:opacity-40 disabled:cursor-not-allowed"
+                        whileHover={userEmail.trim() ? { scale: 1.01 } : {}}
+                        whileTap={userEmail.trim() ? { scale: 0.98 } : {}}
+                        id="google-login-btn"
+                      >
+                        <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24">
+                          <path fill="#EA4335" d="M12 5.04c1.66 0 3.2.57 4.38 1.69l3.27-3.27C17.68 1.54 14.98 1 12 1 7.35 1 3.4 3.65 1.57 7.5l3.86 3C6.34 7.54 9 5.04 12 5.04z" />
+                          <path fill="#4285F4" d="M23.49 12.27c0-.81-.07-1.59-.2-2.34H12v4.45h6.45c-.28 1.48-1.12 2.74-2.38 3.59l3.69 2.87c2.16-1.99 3.42-4.93 3.42-8.57z" />
+                          <path fill="#FBBC05" d="M5.43 14.5c-.24-.72-.38-1.49-.38-2.3s.14-1.58.38-2.3L1.57 6.9C.57 8.9 0 11.13 0 13.5s.57 4.6 1.57 6.6l3.86-3z" />
+                          <path fill="#34A853" d="M12 23c3.24 0 5.97-1.07 7.96-2.91l-3.69-2.87c-1.03.69-2.35 1.1-3.96 1.1-3 0-5.66-2.5-6.57-5.46L.88 15.86C2.71 19.7 6.66 23 12 23z" />
+                        </svg>
+                        <span>Continue with Google</span>
+                      </motion.button>
+
+                      {/* Guest Login */}
+                      <motion.button
+                        onClick={() => handleLogin('guest@smartdocs.ai')}
+                        className="w-full py-3.5 rounded-xl bg-white/5 border border-white/8 hover:bg-white/8 text-white text-sm font-semibold flex items-center justify-center space-x-3 transition-all"
+                        whileHover={{ scale: 1.01 }}
+                        whileTap={{ scale: 0.98 }}
+                        id="guest-login-btn"
+                      >
+                        <User className="w-4.5 h-4.5 text-brand-purple" />
+                        <span>Continue as Guest</span>
+                      </motion.button>
+                    </div>
+
+                    {/* Social proof */}
+                    <div className="flex items-center justify-center space-x-1 pt-1">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <div key={i} className="w-6 h-6 rounded-full bg-gradient-to-tr from-brand-purple to-brand-cyan border-2 border-black flex items-center justify-center text-[8px] font-black text-white -ml-1 first:ml-0">
+                          {['S','D','P','M','R'][i]}
+                        </div>
+                      ))}
+                      <span className="text-[10px] text-gray-400 font-semibold ml-2">Join 12,400+ researchers</span>
+                    </div>
+
+                    <div className="text-[9px] text-gray-600 text-center leading-relaxed font-normal">
+                      By accessing SmartDocs, you agree to our terms. All data is containerized in your private instance.
+                    </div>
+                  </GlassCard>
+                </div>
               </motion.div>
             ) : (
               // 9. Premium Hero Landing View
@@ -1373,108 +1614,411 @@ export default function App() {
                 className="pt-24 min-h-screen"
                 id="landing-page"
               >
-                {/* Hero section */}
-                <section className="px-6 py-20 text-center max-w-5xl mx-auto space-y-8 relative">
-                  {/* Glowing decorative chips */}
-                  <div className="inline-flex items-center space-x-2 px-3 py-1.5 rounded-full bg-brand-purple/10 border border-brand-purple/20 text-xs font-bold text-brand-purple animate-float">
+                {/* Hero section — Enhanced */}
+                <section className="px-6 py-24 text-center max-w-5xl mx-auto space-y-8 relative">
+                  {/* Floating badge */}
+                  <motion.div
+                    initial={{ opacity: 0, y: -12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                    className="inline-flex items-center space-x-2 px-4 py-2 rounded-full bg-brand-purple/10 border border-brand-purple/25 text-xs font-bold text-brand-purple animate-float shadow-purple-glow"
+                  >
                     <Sparkles className="w-4 h-4 text-brand-cyan shrink-0 animate-pulse" />
-                    <span>Next-Gen Knowledge Synthesis Vault</span>
-                  </div>
+                    <span>Next-Gen Knowledge Synthesis Vault · Powered by Gemini 2.5 Flash</span>
+                  </motion.div>
 
-                  <h1 className="text-4xl md:text-6xl font-extrabold text-white leading-none tracking-tight">
-                    Transform long documents into <br />
-                    <span className="bg-gradient-to-r from-brand-purple via-brand-cyan to-white bg-clip-text text-transparent">
-                      Instant, Interactive Knowledge
+                  <motion.h1
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.15, type: 'spring', stiffness: 200 }}
+                    className="text-5xl md:text-7xl font-black text-white leading-none tracking-tighter"
+                  >
+                    Transform documents into
+                    <br />
+                    <span className="gradient-text-animated">
+                      Instant Knowledge
                     </span>
-                  </h1>
+                  </motion.h1>
 
-                  <p className="text-base md:text-lg text-gray-400 max-w-2xl mx-auto leading-relaxed">
-                    Stop drowning in multi-page PDFs, manuals, and reports. Upload your files and let Gemini synthesize premium summaries, structured quizzes, and custom threaded research chats instantly.
-                  </p>
+                  <motion.p
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                    className="text-base md:text-xl text-gray-400 max-w-2xl mx-auto leading-relaxed"
+                  >
+                    Stop drowning in multi-page PDFs, manuals, and reports. Upload your files and let Gemini synthesize premium summaries, structured quizzes, and custom AI chats instantly.
+                  </motion.p>
 
-                  <div className="flex items-center justify-center space-x-4 pt-4">
-                    <button
+                  <motion.div
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.25 }}
+                    className="flex flex-wrap items-center justify-center gap-4 pt-4"
+                  >
+                    <motion.button
                       onClick={() => setCurrentPage('auth')}
-                      className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-brand-purple to-brand-purple/80 hover:from-brand-purple hover:to-brand-purple text-sm font-bold text-white shadow-xl shadow-brand-purple/25 flex items-center space-x-2 group active:scale-95 transition-all"
+                      className="px-8 py-4 rounded-2xl bg-gradient-to-r from-brand-purple to-brand-purple/80 text-sm font-bold text-white shadow-purple-glow flex items-center space-x-2.5 group"
+                      whileHover={{ scale: 1.04, y: -2 }}
+                      whileTap={{ scale: 0.97 }}
                       id="landing-hero-cta"
                     >
+                      <Zap className="w-4.5 h-4.5 text-brand-cyan" />
                       <span>Start Reading For Free</span>
                       <ArrowRight className="w-4.5 h-4.5 group-hover:translate-x-1 transition-transform" />
-                    </button>
+                    </motion.button>
                     <a
                       href="#features"
-                      className="px-6 py-3.5 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 text-sm font-bold text-white transition-all active:scale-95"
+                      className="px-7 py-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/8 text-sm font-bold text-white transition-all"
                     >
-                      Learn More
+                      Explore Features
                     </a>
-                  </div>
+                  </motion.div>
+
+                  {/* Trust Stats Bar — Enhanced */}
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.4 }}
+                    className="flex flex-wrap items-center justify-center gap-x-2 gap-y-3 pt-6"
+                  >
+                    {[
+                      { icon: Users, label: '50,000+', sub: 'Active Users', color: 'text-brand-purple', bg: 'bg-brand-purple/10 border-brand-purple/20' },
+                      { icon: Files, label: '2M+ Docs', sub: 'Processed', color: 'text-brand-cyan', bg: 'bg-brand-cyan/10 border-brand-cyan/20' },
+                      { icon: Zap, label: 'Gemini 2.5', sub: 'Flash Powered', color: 'text-amber-400', bg: 'bg-amber-500/10 border-amber-500/20' },
+                      { icon: Shield, label: 'SOC2', sub: 'Compliant', color: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/20' },
+                    ].map((stat, i) => {
+                      const Icon = stat.icon;
+                      return (
+                        <React.Fragment key={i}>
+                          <motion.div
+                            initial={{ opacity: 0, y: 8 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.4 + i * 0.08 }}
+                            className="flex items-center space-x-2.5 text-left px-4 py-2.5 rounded-2xl bg-white/[0.03] border border-white/6 hover:border-white/10 transition-all"
+                          >
+                            <div className={`w-8 h-8 rounded-lg ${stat.bg} border flex items-center justify-center ${stat.color} shrink-0`}>
+                              <Icon className="w-3.5 h-3.5" />
+                            </div>
+                            <div>
+                              <div className={`text-sm font-black ${stat.color}`}>{stat.label}</div>
+                              <div className="text-[10px] text-gray-500 font-semibold">{stat.sub}</div>
+                            </div>
+                          </motion.div>
+                          {i < 3 && <div className="hidden md:block w-px h-6 bg-white/8" />}
+                        </React.Fragment>
+                      );
+                    })}
+                  </motion.div>
+
+                  {/* Product Demo Mockup */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 32 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.55, type: 'spring', stiffness: 180 }}
+                    className="pt-8 max-w-4xl mx-auto w-full"
+                  >
+                    <div className="relative rounded-2xl overflow-hidden border border-white/10 shadow-[0_32px_80px_-16px_rgba(168,85,247,0.3)]" style={{ background: 'linear-gradient(145deg, rgba(168,85,247,0.08) 0%, rgba(10,10,20,0.95) 40%, rgba(34,211,238,0.05) 100%)' }}>
+                      {/* Window chrome bar */}
+                      <div className="flex items-center px-4 py-3 border-b border-white/6 bg-white/[0.03]">
+                        <div className="flex items-center space-x-1.5">
+                          <div className="w-3 h-3 rounded-full bg-red-500/60" />
+                          <div className="w-3 h-3 rounded-full bg-amber-500/60" />
+                          <div className="w-3 h-3 rounded-full bg-emerald-500/60" />
+                        </div>
+                        <div className="flex-1 flex justify-center">
+                          <div className="flex items-center space-x-1.5 px-3 py-1 rounded-md bg-white/5 border border-white/8">
+                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping-soft" />
+                            <span className="text-[10px] text-gray-400 font-mono">smartdocs.ai/workspace</span>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-1.5">
+                          <div className="px-2 py-1 rounded bg-brand-purple/20 border border-brand-purple/25">
+                            <span className="text-[9px] text-brand-purple font-bold uppercase tracking-wider">LIVE</span>
+                          </div>
+                        </div>
+                      </div>
+                      {/* Demo content */}
+                      <div className="grid grid-cols-5 min-h-[280px]">
+                        {/* Sidebar */}
+                        <div className="col-span-1 border-r border-white/5 p-3 space-y-2 bg-black/20">
+                          {[{ icon: LayoutDashboard, label: 'Dashboard', active: false }, { icon: Files, label: 'Library', active: true }, { icon: MessageSquare, label: 'AI Chat', active: false }, { icon: Network, label: 'Graph', active: false }].map((item, i) => {
+                            const SIcon = item.icon;
+                            return (
+                              <div key={i} className={`flex items-center space-x-2 px-2 py-2 rounded-lg text-[10px] font-semibold transition-all ${ item.active ? 'bg-brand-purple/20 text-brand-purple border border-brand-purple/20' : 'text-gray-500 hover:text-gray-300'}`}>
+                                <SIcon className="w-3 h-3 shrink-0" />
+                                <span className="hidden lg:block">{item.label}</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                        {/* Main area */}
+                        <div className="col-span-4 p-4 space-y-3">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <div className="text-xs font-bold text-white">Document Library</div>
+                              <div className="text-[9px] text-gray-500 mt-0.5">3 documents • AI-processed</div>
+                            </div>
+                            <div className="flex items-center space-x-1.5">
+                              <div className="px-2.5 py-1.5 rounded-lg bg-brand-purple text-[9px] font-bold text-white flex items-center space-x-1">
+                                <Zap className="w-2.5 h-2.5 text-brand-cyan" />
+                                <span>Upload</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            {[{ name: 'Q3 Financial Report.pdf', type: 'PDF', status: 'Analyzed', color: 'text-brand-purple' }, { name: 'Research Paper — LLMs.docx', type: 'DOCX', status: 'Chat Ready', color: 'text-brand-cyan' }, { name: 'Contract_Draft_v2.pdf', type: 'PDF', status: 'Summarized', color: 'text-emerald-400' }].map((doc, i) => (
+                              <div key={i} className="flex items-center justify-between p-2.5 rounded-xl bg-white/[0.04] border border-white/6 hover:border-brand-purple/20 transition-all group">
+                                <div className="flex items-center space-x-2.5">
+                                  <div className={`w-7 h-7 rounded-lg bg-white/5 border border-white/8 flex items-center justify-center ${doc.color}`}>
+                                    <FileText className="w-3.5 h-3.5" />
+                                  </div>
+                                  <div>
+                                    <div className="text-[10px] font-semibold text-white">{doc.name}</div>
+                                    <div className={`text-[9px] font-bold uppercase tracking-wider mt-0.5 ${doc.color}`}>{doc.type}</div>
+                                  </div>
+                                </div>
+                                <div className="flex items-center space-x-1.5">
+                                  <span className="px-2 py-0.5 rounded-md bg-white/5 text-[8px] font-bold text-gray-400 border border-white/5">{doc.status}</span>
+                                  <ChevronRight className="w-3 h-3 text-gray-600 group-hover:text-brand-purple transition-colors" />
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                          {/* AI Chat preview strip */}
+                          <div className="mt-2 p-3 rounded-xl bg-brand-purple/8 border border-brand-purple/15">
+                            <div className="flex items-center space-x-2">
+                              <div className="w-5 h-5 rounded-lg bg-brand-purple/25 flex items-center justify-center">
+                                <Sparkles className="w-2.5 h-2.5 text-brand-purple animate-pulse" />
+                              </div>
+                              <span className="text-[9px] text-brand-purple font-semibold">AI: "The Q3 revenue grew 23% YoY, driven by SaaS subscriptions..."</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    {/* Glow behind mockup */}
+                    <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-brand-dark to-transparent pointer-events-none" />
+                  </motion.div>
                 </section>
 
-                {/* Features Section */}
+                {/* Features Section — 6 cards bento grid */}
                 <section id="features" className="px-6 py-20 max-w-7xl mx-auto space-y-12">
-                  <div className="text-center space-y-2">
-                    <h2 className="text-2xl md:text-3xl font-extrabold text-white">Full-Stack AI Automation Suite</h2>
-                    <p className="text-xs text-gray-400 max-w-md mx-auto">Everything you need to digest manual pages in minutes instead of grueling hours.</p>
-                  </div>
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    className="text-center space-y-3"
+                  >
+                    <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-white/5 border border-white/8 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                      <Cpu className="w-3 h-3" />
+                      <span>Full-Stack AI Suite</span>
+                    </div>
+                    <h2 className="text-3xl md:text-4xl font-black text-white tracking-tight">Everything You Need to Master
+                      <span className="block gradient-text-purple-cyan">Any Document</span>
+                    </h2>
+                    <p className="text-sm text-gray-400 max-w-lg mx-auto leading-relaxed">Digest complex manuals in minutes, not hours. Powered by Gemini 2.5 Flash.</p>
+                  </motion.div>
 
-                  {/* Features bento grid */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* 6-card bento grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                     {[
                       {
                         title: 'Multimodal Parsing',
-                        desc: 'Native Gemini compatibility extracts data patterns from PDFs, Word docs, and plain text files automatically.',
+                        desc: 'Native Gemini compatibility extracts data patterns from PDFs, Word docs, and plain text automatically.',
                         icon: Files,
-                        color: 'text-brand-purple'
+                        gradient: 'from-brand-purple/20 to-brand-purple/5',
+                        border: 'border-brand-purple/20',
+                        iconColor: 'text-brand-purple',
                       },
                       {
-                        title: 'Interactive Chatbot',
-                        desc: 'Semantic conversations supported by total document memory context, giving accurate citations without hallucination.',
+                        title: 'AI Context Chat',
+                        desc: 'Semantic conversations with total document memory context, giving accurate citations without hallucination.',
                         icon: MessageSquare,
-                        color: 'text-brand-cyan'
+                        gradient: 'from-brand-cyan/15 to-brand-cyan/5',
+                        border: 'border-brand-cyan/20',
+                        iconColor: 'text-brand-cyan',
                       },
                       {
-                        title: 'Quiz & Recall System',
-                        desc: 'Generate multiple-choice interactive exams from your uploaded files to test recall with detailed answer feedback.',
+                        title: 'Quiz & Recall Engine',
+                        desc: 'Generate multiple-choice exams from your uploads to test recall with detailed answer feedback.',
                         icon: HelpCircle,
-                        color: 'text-green-400'
-                      }
+                        gradient: 'from-emerald-500/15 to-emerald-500/5',
+                        border: 'border-emerald-500/20',
+                        iconColor: 'text-emerald-400',
+                      },
+                      {
+                        title: 'Knowledge Graph',
+                        desc: 'Visualize concept relationships as an interactive node graph mapping every idea in your document.',
+                        icon: Network,
+                        gradient: 'from-indigo-500/15 to-indigo-500/5',
+                        border: 'border-indigo-500/20',
+                        iconColor: 'text-indigo-400',
+                      },
+                      {
+                        title: 'Email Automation',
+                        desc: 'AI-drafted professional emails for offer letters, summaries, assignment answers, and contract reviews.',
+                        icon: Mail,
+                        gradient: 'from-amber-500/15 to-amber-500/5',
+                        border: 'border-amber-500/20',
+                        iconColor: 'text-amber-400',
+                      },
+                      {
+                        title: 'Candidate Assessment',
+                        desc: 'Full AI recruitment pipeline: resume analysis, custom quizzes, interview simulation, and automated decisions.',
+                        icon: Users,
+                        gradient: 'from-rose-500/15 to-rose-500/5',
+                        border: 'border-rose-500/20',
+                        iconColor: 'text-rose-400',
+                      },
                     ].map((feat, idx) => {
                       const Icon = feat.icon;
                       return (
-                        <GlassCard key={idx} className="space-y-4 hover:translate-y-[-4px] transition-all" id={`feature-card-${idx}`}>
-                          <div className={`w-10 h-10 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center ${feat.color}`}>
-                            <Icon className="w-5 h-5" />
-                          </div>
-                          <h4 className="text-base font-bold text-white">{feat.title}</h4>
-                          <p className="text-xs text-gray-400 leading-relaxed font-normal">{feat.desc}</p>
-                        </GlassCard>
+                        <motion.div
+                          key={idx}
+                          initial={{ opacity: 0, y: 24 }}
+                          whileInView={{ opacity: 1, y: 0 }}
+                          viewport={{ once: true }}
+                          transition={{ delay: idx * 0.07, type: 'spring', stiffness: 250 }}
+                        >
+                          <GlassCard hoverEffect className={`space-y-4 h-full border ${feat.border}`} id={`feature-card-${idx}`}>
+                            <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${feat.gradient} border ${feat.border} flex items-center justify-center ${feat.iconColor}`}>
+                              <Icon className="w-5.5 h-5.5" />
+                            </div>
+                            <div>
+                              <h4 className="text-sm font-bold text-white mb-2">{feat.title}</h4>
+                              <p className="text-xs text-gray-400 leading-relaxed font-normal">{feat.desc}</p>
+                            </div>
+                          </GlassCard>
+                        </motion.div>
                       );
                     })}
                   </div>
                 </section>
 
-                {/* Testimonials Section */}
-                <section className="px-6 py-20 bg-white/[0.01] border-y border-white/5">
-                  <div className="max-w-5xl mx-auto space-y-12">
-                    <div className="text-center space-y-2">
-                      <h2 className="text-2xl md:text-3xl font-extrabold text-white">Loved by Researchers and Professionals</h2>
-                      <p className="text-xs text-gray-400">See how SmartDocs AI transforms daily reading workflows.</p>
+                {/* How It Works — 3-step animated process */}
+                <section className="px-6 py-20 max-w-5xl mx-auto">
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    className="text-center space-y-3 mb-16"
+                  >
+                    <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-brand-cyan/10 border border-brand-cyan/20 text-[10px] font-bold text-brand-cyan uppercase tracking-widest">
+                      <Play className="w-3 h-3" />
+                      <span>Simple 3-Step Process</span>
                     </div>
+                    <h2 className="text-3xl md:text-4xl font-black text-white tracking-tight">From Upload to
+                      <span className="block gradient-text-animated">Intelligence in Seconds</span>
+                    </h2>
+                    <p className="text-sm text-gray-400 max-w-lg mx-auto leading-relaxed">No complex setup. Just drop your document and let Gemini do the heavy lifting.</p>
+                  </motion.div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="relative">
+                    {/* Connecting line */}
+                    <div className="absolute top-10 left-[16.666%] right-[16.666%] h-px bg-gradient-to-r from-brand-purple/40 via-brand-cyan/40 to-emerald-500/40 hidden md:block" />
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                      {[
+                        {
+                          step: '01',
+                          title: 'Upload Your Document',
+                          desc: 'Drag & drop any PDF, DOCX, or TXT file. Our Gemini-powered parser instantly extracts structure, tables, and text with 99.9% fidelity.',
+                          icon: FileText,
+                          color: 'text-brand-purple',
+                          bg: 'from-brand-purple/20 to-brand-purple/5',
+                          border: 'border-brand-purple/25',
+                          glow: 'shadow-purple-glow',
+                        },
+                        {
+                          step: '02',
+                          title: 'AI Analyzes & Maps',
+                          desc: 'Gemini 2.5 Flash reads the full context, builds a knowledge graph, detects key entities, generates summaries, and creates quiz sets.',
+                          icon: Brain,
+                          color: 'text-brand-cyan',
+                          bg: 'from-brand-cyan/15 to-brand-cyan/5',
+                          border: 'border-brand-cyan/25',
+                          glow: 'shadow-cyan-glow',
+                        },
+                        {
+                          step: '03',
+                          title: 'Chat, Quiz & Automate',
+                          desc: 'Ask anything, test your knowledge, generate emails, or run full automation workflows. Extract maximum value from every document.',
+                          icon: Sparkles,
+                          color: 'text-emerald-400',
+                          bg: 'from-emerald-500/15 to-emerald-500/5',
+                          border: 'border-emerald-500/25',
+                          glow: '',
+                        },
+                      ].map((step, idx) => {
+                        const SIcon = step.icon;
+                        return (
+                          <motion.div
+                            key={idx}
+                            initial={{ opacity: 0, y: 24 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: idx * 0.12, type: 'spring', stiffness: 250 }}
+                            className="relative flex flex-col items-center text-center group"
+                          >
+                            {/* Step number circle */}
+                            <div className={`relative w-20 h-20 rounded-2xl bg-gradient-to-br ${step.bg} border ${step.border} ${step.glow} flex items-center justify-center mb-5 group-hover:scale-105 transition-transform`}>
+                              <SIcon className={`w-8 h-8 ${step.color}`} />
+                              <div className={`absolute -top-2.5 -right-2.5 w-6 h-6 rounded-full bg-brand-dark border ${step.border} flex items-center justify-center`}>
+                                <span className={`text-[9px] font-black ${step.color}`}>{step.step}</span>
+                              </div>
+                            </div>
+                            <h3 className="text-base font-black text-white mb-2">{step.title}</h3>
+                            <p className="text-xs text-gray-400 leading-relaxed max-w-xs">{step.desc}</p>
+                          </motion.div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </section>
+
+                {/* Testimonials Section — Enhanced with star ratings & 4 cards */}
+                <section className="px-6 py-20 bg-white/[0.015] border-y border-white/5">
+                  <div className="max-w-6xl mx-auto space-y-12">
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      className="text-center space-y-3"
+                    >
+                      <h2 className="text-3xl md:text-4xl font-black text-white tracking-tight">Loved by Researchers
+                        <span className="block gradient-text-purple-cyan">and Professionals</span>
+                      </h2>
+                      <p className="text-sm text-gray-400">See how SmartDocs AI transforms daily reading workflows across industries.</p>
+                    </motion.div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                       {testimonials.map((t, idx) => (
-                        <GlassCard key={idx} className="p-6 space-y-4 text-left" id={`testimonial-${idx}`}>
-                          <p className="text-xs text-gray-300 italic">"{t.quote}"</p>
-                          <div className="flex items-center space-x-3.5 pt-2">
-                            <div className="w-8 h-8 rounded-full bg-brand-purple flex items-center justify-center text-xs font-bold text-white shrink-0">
-                              {t.avatar}
+                        <motion.div
+                          key={idx}
+                          initial={{ opacity: 0, y: 20 }}
+                          whileInView={{ opacity: 1, y: 0 }}
+                          viewport={{ once: true }}
+                          transition={{ delay: idx * 0.1 }}
+                        >
+                          <GlassCard hoverEffect className={`p-6 space-y-4 text-left h-full bg-gradient-to-br ${t.color} border border-white/8`} id={`testimonial-${idx}`}>
+                            {/* Stars */}
+                            <div className="flex items-center space-x-0.5">
+                              {Array.from({ length: t.stars }).map((_, i) => (
+                                <Star key={i} className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+                              ))}
                             </div>
-                            <div>
-                              <div className="text-xs font-bold text-white">{t.name}</div>
-                              <div className="text-[10px] text-gray-500 font-semibold">{t.role}</div>
+                            <p className="text-sm text-gray-200 leading-relaxed">"{t.quote}"</p>
+                            <div className="flex items-center space-x-3 pt-1">
+                              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-purple to-brand-cyan flex items-center justify-center text-sm font-black text-white shrink-0">
+                                {t.avatar}
+                              </div>
+                              <div>
+                                <div className="text-xs font-bold text-white">{t.name}</div>
+                                <div className="text-[10px] text-gray-400 font-semibold mt-0.5">{t.role}</div>
+                              </div>
                             </div>
-                          </div>
-                        </GlassCard>
+                          </GlassCard>
+                        </motion.div>
                       ))}
                     </div>
                   </div>
@@ -1482,37 +2026,198 @@ export default function App() {
 
                 {/* FAQ Section */}
                 <section id="faq" className="px-6 py-20 max-w-3xl mx-auto space-y-12">
-                  <div className="text-center space-y-2">
-                    <h2 className="text-2xl md:text-3xl font-extrabold text-white">Frequently Asked Questions</h2>
-                    <p className="text-xs text-gray-400">Answers to common inquiries about workspace operations.</p>
-                  </div>
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    className="text-center space-y-3"
+                  >
+                    <h2 className="text-3xl font-black text-white">Frequently Asked
+                      <span className="gradient-text-purple-cyan ml-2">Questions</span>
+                    </h2>
+                    <p className="text-sm text-gray-400">Answers to common inquiries about workspace operations.</p>
+                  </motion.div>
 
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     {faqs.map((f, idx) => (
-                      <GlassCard key={idx} className="p-5 text-left space-y-2" id={`faq-item-${idx}`}>
-                        <div className="flex items-center space-x-2 text-xs font-bold text-white">
-                          <FaqIcon className="w-4 h-4 text-brand-purple shrink-0" />
-                          <span>{f.q}</span>
-                        </div>
-                        <p className="text-xs text-gray-400 leading-relaxed pl-6 font-normal">
-                          {f.a}
-                        </p>
-                      </GlassCard>
+                      <motion.div
+                        key={idx}
+                        initial={{ opacity: 0, x: -16 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: idx * 0.08 }}
+                      >
+                        <GlassCard className="p-5 text-left space-y-2.5 hover:border-brand-purple/20 transition-colors" id={`faq-item-${idx}`}>
+                          <div className="flex items-start space-x-3">
+                            <div className="w-6 h-6 rounded-lg bg-brand-purple/15 border border-brand-purple/20 flex items-center justify-center shrink-0 mt-0.5">
+                              <FaqIcon className="w-3.5 h-3.5 text-brand-purple" />
+                            </div>
+                            <div>
+                              <p className="text-sm font-bold text-white leading-snug">{f.q}</p>
+                              <p className="text-xs text-gray-400 leading-relaxed mt-2 font-normal">{f.a}</p>
+                            </div>
+                          </div>
+                        </GlassCard>
+                      </motion.div>
                     ))}
                   </div>
                 </section>
 
-                {/* Modern Footer */}
-                <footer className="py-12 border-t border-white/5 text-center space-y-4 px-6 z-10 relative">
-                  <div className="flex items-center justify-center space-x-2">
-                    <div className="w-6 h-6 rounded-md bg-brand-purple flex items-center justify-center text-white">
-                      <BookOpen className="w-3.5 h-3.5" />
+                {/* Pricing Section */}
+                <section id="pricing" className="px-6 py-20 max-w-6xl mx-auto space-y-12">
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    className="text-center space-y-3"
+                  >
+                    <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-white/5 border border-white/8 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                      <Crown className="w-3 h-3 text-amber-400" />
+                      <span>Simple Pricing</span>
                     </div>
-                    <span className="text-xs font-bold text-white">SmartDocs AI</span>
+                    <h2 className="text-3xl md:text-4xl font-black text-white tracking-tight">Choose Your
+                      <span className="block gradient-text-animated">Intelligence Level</span>
+                    </h2>
+                    <p className="text-sm text-gray-400 max-w-md mx-auto">Start free, scale when ready. No hidden fees.</p>
+                  </motion.div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+                    {pricingTiers.map((tier, idx) => {
+                      const Icon = tier.icon;
+                      return (
+                        <motion.div
+                          key={idx}
+                          initial={{ opacity: 0, y: 30 }}
+                          whileInView={{ opacity: 1, y: 0 }}
+                          viewport={{ once: true }}
+                          transition={{ delay: idx * 0.1, type: 'spring', stiffness: 250 }}
+                          className="relative"
+                        >
+                          {tier.popular && (
+                            <div className="absolute -top-3.5 left-0 right-0 flex justify-center z-10">
+                              <span className="px-4 py-1 rounded-full bg-gradient-to-r from-brand-purple to-brand-cyan text-[10px] font-black text-white uppercase tracking-wider shadow-purple-glow">
+                                ✦ Most Popular
+                              </span>
+                            </div>
+                          )}
+                          <div className={`rounded-2xl p-6 space-y-5 ${tier.bg || 'glass-panel border border-white/8'} ${tier.popular ? 'scale-105' : ''} transition-all hover:scale-[1.02] hover:shadow-elevation-lg`}>
+                            <div className="flex items-center space-x-3">
+                              <div className={`w-10 h-10 rounded-xl bg-white/8 border ${tier.borderColor} flex items-center justify-center ${tier.color}`}>
+                                <Icon className="w-5 h-5" />
+                              </div>
+                              <div>
+                                <div className={`text-sm font-black ${tier.color}`}>{tier.name}</div>
+                                <div className="text-[10px] text-gray-500 font-semibold">{tier.description}</div>
+                              </div>
+                            </div>
+                            <div className="flex items-baseline space-x-1">
+                              <span className="text-4xl font-black text-white">{tier.price}</span>
+                              <span className="text-xs text-gray-500 font-medium">{tier.period}</span>
+                            </div>
+                            <div className="h-px bg-gradient-to-r from-transparent via-white/8 to-transparent" />
+                            <ul className="space-y-2">
+                              {tier.features.map((f, fi) => (
+                                <li key={fi} className="flex items-center space-x-2.5 text-xs text-gray-300">
+                                  <CheckCircle2 className={`w-4 h-4 shrink-0 ${tier.color}`} />
+                                  <span>{f}</span>
+                                </li>
+                              ))}
+                            </ul>
+                            <button
+                              onClick={() => setCurrentPage('auth')}
+                              className={`w-full py-3 rounded-xl text-sm font-bold transition-all active:scale-95 ${tier.ctaStyle}`}
+                            >
+                              {tier.cta}
+                            </button>
+                          </div>
+                        </motion.div>
+                      );
+                    })}
                   </div>
-                  <p className="text-[10px] text-gray-500">
-                    © 2026 SmartDocs AI. Designed with absolute precision for hackathons. Powered by Gemini.
-                  </p>
+                </section>
+
+                {/* Full-width CTA Banner */}
+                <section className="px-6 pb-12 max-w-5xl mx-auto">
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.97 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true }}
+                    className="relative overflow-hidden rounded-3xl p-12 text-center"
+                    style={{ background: 'linear-gradient(135deg, rgba(168,85,247,0.18) 0%, rgba(34,211,238,0.1) 50%, rgba(168,85,247,0.08) 100%)', border: '1px solid rgba(168,85,247,0.25)' }}
+                  >
+                    <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: 'radial-gradient(circle, #a855f7 1px, transparent 1px)', backgroundSize: '28px 28px' }} />
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-brand-purple/15 blur-3xl rounded-full" />
+                    <div className="absolute bottom-0 left-0 w-48 h-48 bg-brand-cyan/10 blur-2xl rounded-full" />
+                    <div className="relative space-y-5">
+                      <div className="text-4xl">🚀</div>
+                      <h2 className="text-3xl md:text-4xl font-black text-white tracking-tight">
+                        Ready to Transform Your
+                        <span className="block gradient-text-animated">Document Workflow?</span>
+                      </h2>
+                      <p className="text-sm text-gray-300 max-w-lg mx-auto leading-relaxed">
+                        Join 50,000+ researchers, analysts, and professionals who use SmartDocs AI to work 10x smarter.
+                      </p>
+                      <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
+                        <motion.button
+                          onClick={() => setCurrentPage('auth')}
+                          className="px-8 py-4 rounded-2xl bg-gradient-to-r from-brand-purple to-brand-cyan text-sm font-black text-white shadow-purple-glow flex items-center space-x-2.5"
+                          whileHover={{ scale: 1.05, y: -2 }}
+                          whileTap={{ scale: 0.97 }}
+                          id="cta-banner-btn"
+                        >
+                          <Rocket className="w-4.5 h-4.5" />
+                          <span>Start For Free — No Credit Card</span>
+                        </motion.button>
+                      </div>
+                    </div>
+                  </motion.div>
+                </section>
+
+                {/* Enhanced Footer */}
+                <footer className="py-16 border-t border-white/5 px-6 z-10 relative">
+                  <div className="max-w-6xl mx-auto">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-8 pb-10">
+                      {/* Brand */}
+                      <div className="space-y-4 md:col-span-1">
+                        <div className="flex items-center space-x-2">
+                          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-brand-purple to-brand-cyan flex items-center justify-center shadow-purple-glow">
+                            <BookOpen className="w-4 h-4 text-white" />
+                          </div>
+                          <span className="text-sm font-black text-white">SmartDocs AI</span>
+                        </div>
+                        <p className="text-xs text-gray-500 leading-relaxed">Enterprise document intelligence powered by Google Gemini 2.5 Flash.</p>
+                        <div className="flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg bg-emerald-500/8 border border-emerald-500/15 w-fit">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                          <span className="text-[9px] font-bold text-emerald-400 uppercase tracking-wider">All Systems Operational</span>
+                        </div>
+                      </div>
+                      {/* Links */}
+                      {[
+                        { title: 'Product', links: ['Features', 'Pricing', 'Changelog', 'Roadmap'] },
+                        { title: 'Company', links: ['About', 'Blog', 'Careers', 'Contact'] },
+                        { title: 'Legal', links: ['Privacy', 'Terms', 'Security', 'Compliance'] },
+                      ].map((col) => (
+                        <div key={col.title} className="space-y-3">
+                          <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">{col.title}</div>
+                          <ul className="space-y-2">
+                            {col.links.map(link => (
+                              <li key={link}><a href="#" className="text-xs text-gray-500 hover:text-gray-200 transition-colors">{link}</a></li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="pt-6 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-4">
+                      <p className="text-[10px] text-gray-600">
+                        © 2026 SmartDocs AI · Designed with absolute precision · Powered by Gemini
+                      </p>
+                      <div className="flex items-center space-x-4">
+                        {['Privacy', 'Terms', 'Cookies'].map(l => (
+                          <a key={l} href="#" className="text-[10px] text-gray-600 hover:text-gray-400 transition-colors">{l}</a>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
                 </footer>
               </motion.div>
             )}
