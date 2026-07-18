@@ -115,7 +115,6 @@ export const DocumentUpload: React.FC<DocumentUploadProps> = ({ onUploadSuccess 
       const blob = await put(selectedFile.name, selectedFile, {
         access: 'public',
         token: token,
-        allowOverwrite: true,
         addRandomSuffix: true
       });
       
