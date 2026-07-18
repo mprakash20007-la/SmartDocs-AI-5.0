@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { Upload, File, FileText, AlertCircle, CheckCircle2, RefreshCw, ArrowRight } from 'lucide-react';
 import { motion } from 'motion/react';
+import { put } from '@vercel/blob';
 import GlassCard from './GlassCard';
 
 interface DocumentUploadProps {
@@ -95,23 +96,29 @@ export const DocumentUpload: React.FC<DocumentUploadProps> = ({ onUploadSuccess 
     };
 
     try {
-      let content = '';
       let type: 'pdf' | 'docx' | 'txt' = 'txt';
-
-      await simulateStage(25, 'Analyzing document structures...', 600);
 
       if (fileExtension === 'pdf') {
         type = 'pdf';
-        content = await fileToBase64(selectedFile);
       } else if (fileExtension === 'docx' || fileExtension === 'doc') {
         type = 'docx';
-        content = await fileToBase64(selectedFile);
-      } else {
-        type = 'txt';
-        content = await fileToText(selectedFile);
       }
 
-      await simulateStage(50, 'Synthesizing layout structure & metadata...', 600);
+      await simulateStage(25, 'Requesting secure upload token...', 600);
+      
+      const tokenRes = await fetch('/api/upload-token');
+      if (!tokenRes.ok) throw new Error('Failed to get upload token');
+      const { token } = await tokenRes.json();
+
+      await simulateStage(50, 'Uploading directly to Vercel Blob...', 600);
+      
+      const blob = await put(selectedFile.name, selectedFile, {
+        access: 'public',
+        token: token
+      });
+      
+      const fileUrl = blob.url;
+
       await simulateStage(75, 'Deploying vector embedding models...', 600);
       await simulateStage(90, 'Vaulting document into research index...', 400);
 
@@ -121,7 +128,7 @@ export const DocumentUpload: React.FC<DocumentUploadProps> = ({ onUploadSuccess 
         body: JSON.stringify({
           title: selectedFile.name,
           type,
-          content,
+          fileUrl, // Using direct URL instead of base64
           size: formatBytes(selectedFile.size)
         })
       });
